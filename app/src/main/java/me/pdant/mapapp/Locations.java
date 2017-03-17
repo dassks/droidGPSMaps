@@ -14,6 +14,11 @@ import android.util.Log;
  * <p>
  * Will handle locations and gps. Using this class we can get the current location using various methods.
  * Permissions will also be handled here as different permissions are important
+ *
+ * TODO:
+ *  - Create a getter for longitude and latitude
+ *  - Integrate it with the google maps activity
+ *  - Create new main activity which is loaded first
  */
 
 public class Locations implements LocationListener {
