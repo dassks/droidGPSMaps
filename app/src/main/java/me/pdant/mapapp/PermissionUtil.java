@@ -16,20 +16,22 @@ import android.util.Log;
  * requesting permission from the user.
  */
 
-public class PermissionUtil implements ActivityCompat.OnRequestPermissionsResultCallback {
+class PermissionUtil implements ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private Manifest.permission permission;
+    private static final String LOG_TAG = "PermissionUtil";
+
+    private String requestedPermission; // All permissions are string based of manifest object
     private String reason;
     private Activity activity;
 
-    private static final int PERMISSION_REQUEST_FINE_LOC = 986;
+    private static final int PERMISSION_REQUEST_RESULT = 986;
 
     // Will be true if the permission has been requested already
     public boolean hasPermission = false;
 
 
-    public PermissionUtil(Manifest.permission perm, String reason, Context context){
-        permission = perm;
+    PermissionUtil(String perm, String reason, Context context){
+        requestedPermission = perm;
         this.reason = reason;
         activity = (Activity) context;
 
@@ -43,28 +45,43 @@ public class PermissionUtil implements ActivityCompat.OnRequestPermissionsResult
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
+        switch(requestCode){
+            case PERMISSION_REQUEST_RESULT:
+                Log.i(LOG_TAG, "Permission has been requested for the specified permission");
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Log.i(LOG_TAG, "Permission was granted for the requested result");
+                } else {
+                    Log.i(LOG_TAG, "Permission was denied by user for the requested result");
+                }
+            default:
+                Log.i(LOG_TAG, "Unknown permission requested");
+        }
     }
 
-    public void requestPermission(){
-        /*int permissionCheck = ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION);
-        if(permissionCheck == PackageManager.PERMISSION_GRANTED){
-            return true;
+    /**
+     * Call if user does not have the requested permission. This function will display the permission field
+     */
+    void requestPermission(){
+        if(ActivityCompat.shouldShowRequestPermissionRationale(activity, requestedPermission)){ // POSSIBLE ERROR!!!!!! CHECK ONCE RUNNING!!
+            // Give and explanation of why we need this permission
+            Log.i(LOG_TAG, "We need to explain rationale to user!");
         } else {
-            if(ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)){
-                // Give an explanation to the user *async* about the permissions
-                Log.i("checkLocationPermission", "User needs an explanation of the permissions");
-            } else {
-                ActivityCompat.requestPermissions(activity, new String[]{ Manifest.permission.ACCESS_FINE_LOCATION }, PERMISSION_REQUEST_FINE_LOC);
-                return true;
-            }
-        }*/
+            // Request permission form user
+            Log.i(LOG_TAG, "Requesting permission from user");
+            ActivityCompat.requestPermissions(activity, new String[]{ requestedPermission }, PERMISSION_REQUEST_RESULT);
+        }
     }
 
-    public boolean checkPermission(){
+    /**
+     * Check status of permission you are requesting
+     * @return true if user has granted app specified permission
+     */
+    boolean checkPermission(){
         if(ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            Log.i(LOG_TAG, "Permission Granted!");
             return true;
         } else {
+            Log.i(LOG_TAG, "Permission Denied!");
             return false;
         }
     }
